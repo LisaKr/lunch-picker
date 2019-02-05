@@ -56,6 +56,7 @@ class Setup extends Component {
 
     this.getRandomLunchOptions = this.getRandomLunchOptions.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.onVote = this.onVote.bind(this);
   }
 
   handleInput(e) {
@@ -77,27 +78,54 @@ class Setup extends Component {
     }`;
 
     const coordResp = await axios.get(coordQuery);
-
     const lat = coordResp.data.results[0].bounds.northeast.lat;
     const lng = coordResp.data.results[0].bounds.northeast.lng;
 
-    const offset = Math.random() * (101 - 0) + 0;
+    // const offset = Math.random() * (101 - 0) + 0;
 
     const foodQuery = `https://api.foursquare.com/v2/venues/explore?client_id=${
       secrets.id
     }&client_secret=${
       secrets.secret
-    }&query=lunch&ll=${lat},${lng}&offset=${offset}&v=20170801&limit=3`;
+    }&query=lunch&ll=${lat},${lng}&offset=0&v=20170801&limit=3`;
 
     let foodResp = await axios.get(foodQuery);
+    let temp = foodResp.data.response.groups[0].items;
+
+    temp.map(item => {
+      item.votes = 0;
+      return item;
+    });
 
     this.setState({
-      lunchArray: foodResp.data.response.groups[0].items
+      lunchArray: temp
     });
   }
 
   onVote(name) {
-    console.log("on vote in app", name);
+    const updatedList = this.state.lunchArray.map(item => {
+      if (item.venue.name === name) {
+        return Object.assign({}, item, {
+          votes: item.votes + 1
+        });
+      } else {
+        return item;
+      }
+    });
+
+    console.log(updatedList, "updatedlist");
+
+    this.setState(
+      {
+        lunchArray: updatedList
+      },
+      () => {
+        console.log(
+          this.state.lunchArray,
+          "state after updating lunch list with more votes"
+        );
+      }
+    );
   }
 
   render() {
@@ -112,7 +140,6 @@ class Setup extends Component {
         />
         <Button
           onClick={() => {
-            console.log("magic will happen here");
             this.getRandomLunchOptions(this.state.address);
           }}
         >

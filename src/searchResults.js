@@ -12,9 +12,9 @@ const SearchResultsContainer = styled.div`
 `;
 
 class SearchResults extends Component {
-  constructor() {
-    super();
-  }
+  // constructor() {
+  //   super();
+  // }
 
   render() {
     return (
@@ -26,6 +26,7 @@ class SearchResults extends Component {
               name={venue.venue.name}
               address={venue.venue.location.address}
               category={venue.venue.categories[0].name}
+              votes={venue.votes}
               onVote={this.props.onVote}
             />
           );
